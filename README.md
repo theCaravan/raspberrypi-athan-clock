@@ -7,16 +7,7 @@ Requirements:
 
 Set your internal clock in your Raspberry Pi to your local time and update the GPS coordinates in your main.py file to a location close enough for you. 
 
-This is a visual representation of what this looks like at 07:52. Notice that this is in vertical, as this allows the best use of the LEDs offered by the Unicorn HAT Mini
-
-... ...
-: :   :
-:.:   :
-... ...
-:.. ..:
-..: :.. 
-
-where the remaining bottom portion is a color snake showing how much is left until the next prayer time. 
+The clock is displayed vertically, i.e. where most of the LEDs are positioned from top to bottom, as this allows the best use of the LEDs offered by the Unicorn HAT Mini, where the remaining bottom portion is a color snake showing how much is left until the next prayer time. 
 
 The Unicorn Hat Mini comes with 4 buttons, all functional with this program. 
 
