@@ -1,0 +1,3 @@
+requests~=2.28.1
+unicornhatmini~=0.0.2
+gpiozero~=1.6.2
