@@ -13,11 +13,11 @@ API_INITIAL_LINK = "https://api.aladhan.com/v1/timings"
 TIME_DELAY = 0.05
 
 COLORS = {
-    "white":    (255, 255, 255),
+    "white":    (220, 220, 220),    # LightSlateGray
     "aqua":     (0, 255, 255),
     "lime":     (0, 255, 0),
     "yellow":   (255, 255, 0),
-    "orange":   (255, 165, 0),
+    "orange":   (255, 69, 0),
     "red":      (255, 0, 0),
     "fuchsia":  (255, 0, 255),
 }
@@ -28,7 +28,7 @@ PRAYER_INDEXES = {
     2: "Dhuhr",
     3: "Asr",
     4: "Maghrib",
-    5: "Isha"
+    5: "Isha",
 }
 
 # Unicorn Hat Mini Button Mappings
@@ -50,7 +50,7 @@ BUTTON_B = Button(6)
 BUTTON_A = Button(5)
 
 # Unicorn Hat Mini General Configuration
-SCREEN_BRIGHTNESS = 0.1
+SCREEN_BRIGHTNESS = 0.05
 
 # Numbers to Draw
 # This is aligned to the top and left
@@ -229,5 +229,5 @@ SNAKE_COORDINATES = {
     11:     ((13, 0), COLORS["fuchsia"]),
     9:      ((14, 0), COLORS["fuchsia"]),
     6:      ((15, 0), COLORS["fuchsia"]),
-    3:      ((16, 0), COLORS["fuchsia"])
+    3:      ((16, 0), COLORS["fuchsia"]),
 }
