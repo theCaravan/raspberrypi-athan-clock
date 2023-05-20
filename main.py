@@ -1,119 +1,26 @@
+"""Main Program"""
 import time
 import requests
 import json
 from datetime import datetime
 from datetime import date
 from unicornhatmini import UnicornHATMini
-from gpiozero import Button
+from constants import *
 
 # Prayer Times Parameters
-locations = {
-    "Maplewood": [45.031553, -93.024759, 2]
-}
+latitude = LOCATION[0]
+longitude = LOCATION[1]
+method = LOCATION[2]
 
-current_location = "Maplewood"
-
-latitude = locations[current_location][0]
-longitude = locations[current_location][1]
-method = locations[current_location][2]
-
+# Initialize Unicorn Hat Mini
 unicornhatmini = UnicornHATMini()
+unicornhatmini.set_brightness(SCREEN_BRIGHTNESS)
 
-unicornhatmini.set_brightness(0.1)
-
-# Note, this is aligned to the top and left
-numbers = {
-    0: [
-        [0, 6], [0, 5], [0, 4], [1, 4], [2, 4], [3, 4], [4, 4], [4, 5], [4, 6], [3, 6], [2, 6], [1, 6]
-    ],
-
-    1: [
-        [1, 6], [0, 5], [1, 5], [2, 5], [3, 5], [4, 5], [4, 6], [4, 4]
-    ],
-
-    2: [
-        [0, 6], [0, 5], [0, 4], [1, 4], [2, 4], [2, 5], [2, 6], [3, 6], [4, 6], [4, 5], [4, 4]
-    ],
-
-    3: [
-        [0, 6], [0, 5], [0, 4], [1, 4], [2, 4], [2, 5], [2, 6], [3, 4], [4, 4], [4, 5], [4, 6]
-    ],
-
-    4: [
-        [0, 6], [1, 6], [2, 6], [2, 5], [0, 4], [1, 4], [2, 4], [3, 4], [4, 4]
-    ],
-
-    5: [
-        [0, 4], [0, 5], [0, 6], [1, 6], [2, 6], [2, 5], [2, 4], [3, 4], [4, 4], [4, 5], [4, 6]
-    ],
-
-    6: [
-        [0, 4], [0, 5], [0, 6], [1, 6], [2, 6], [3, 6], [4, 6], [4, 5], [4, 4], [3, 4], [2, 4], [2, 5]
-    ],
-
-    7: [
-        [0, 6], [0, 5], [0, 4], [1, 4], [2, 4], [3, 4], [4, 4]
-    ],
-
-    8: [
-        [1, 6], [0, 6], [0, 5], [0, 4], [1, 4], [2, 4], [2, 5], [2, 6], [3, 6], [4, 6], [4, 5], [4, 4], [3, 4]
-    ],
-
-    9: [
-        [2, 5], [2, 6], [1, 6], [0, 6], [0, 5], [0, 4], [1, 4], [2, 4], [3, 4], [4, 4], [4, 5], [4, 6]
-    ]
-}
-
-already_prayed = False
-
-button_x = Button(16)
-button_y = Button(24)
-button_b = Button(6)
-button_a = Button(5)
-
-snake = {
-    100: [[12, 6], [255, 255, 255]],
-    97: [[13, 6], [255, 255, 255]],
-    94: [[14, 6], [255, 255, 255]],
-    91: [[15, 6], [255, 255, 255]],
-    89: [[16, 6], [255, 255, 255]],
-    86: [[12, 5], [0, 255, 255]],
-    83: [[13, 5], [0, 255, 255]],
-    80: [[14, 5], [0, 255, 255]],
-    77: [[15, 5], [0, 255, 255]],
-    74: [[16, 5], [0, 255, 255]],
-    71: [[12, 4], [0, 255, 0]],
-    69: [[13, 4], [0, 255, 0]],
-    66: [[14, 4], [0, 255, 0]],
-    63: [[15, 4], [0, 255, 0]],
-    60: [[16, 4], [0, 255, 0]],
-    57: [[12, 3], [255, 255, 0]],
-    54: [[13, 3], [255, 255, 0]],
-    51: [[14, 3], [255, 255, 0]],
-    49: [[15, 3], [255, 255, 0]],
-    46: [[16, 3], [255, 255, 0]],
-    43: [[12, 2], [255, 153, 0]],
-    40: [[13, 2], [255, 153, 0]],
-    37: [[14, 2], [255, 153, 0]],
-    34: [[15, 2], [255, 153, 0]],
-    31: [[16, 2], [255, 153, 0]],
-    29: [[12, 1], [255, 0, 0]],
-    26: [[13, 1], [255, 0, 0]],
-    23: [[14, 1], [255, 0, 0]],
-    20: [[15, 1], [255, 0, 0]],
-    17: [[16, 1], [255, 0, 0]],
-    14: [[12, 0], [255, 0, 255]],
-    11: [[13, 0], [255, 0, 255]],
-    9: [[14, 0], [255, 0, 255]],
-    6: [[15, 0], [255, 0, 255]],
-    3: [[16, 0], [255, 0, 255]]
-}
-
-# What happens when button X is pressed
-hide_time = False
-
-a_is_pressed = False
-b_is_pressed = False
+# Set none of the buttons as pressed
+x_is_pressed_hide_time = False
+y_is_pressed_already_prayed = False
+a_is_pressed_next_prayer = False
+b_is_pressed_hijri_date = False
 
 start_time = time.time()
 initial_run = True
@@ -125,6 +32,7 @@ hijri_date_raw = ""
 
 
 def clear_section(start_x, end_x, start_y, end_y):
+    """Clear a section of pixels, such as when changing the number or an entire line for a new hour"""
     this_x = start_x
 
     if start_x > end_x:
@@ -140,17 +48,18 @@ def clear_section(start_x, end_x, start_y, end_y):
             this_y += 1
         this_x += 1
 
-    time.sleep(0.05)
+    time.sleep(TIME_DELAY)
     unicornhatmini.show()
 
 
-def display_snake_pct(percent, initial_run_snake):
+def display_snake_pct(percent):
+    """Display the remaining percentage based on the coordinates and colors set by SNAKE_COORDINATES"""
     percent = int(percent)
 
     if percent > 100 or percent < 0:
         raise ValueError
 
-    percentages = snake.keys()
+    percentages = SNAKE_COORDINATES.keys()
 
     # Grab the percentage value just greater than the last, which was less than or equal
     previous_percentage = 0
@@ -171,21 +80,22 @@ def display_snake_pct(percent, initial_run_snake):
             percentages_to_display.append(percentage)
 
     for percentage in percentages_to_display:
-        x = snake[percentage][0][0]
-        y = snake[percentage][0][1]
+        x = SNAKE_COORDINATES[percentage][0][0]
+        y = SNAKE_COORDINATES[percentage][0][1]
 
-        r = snake[percentage][1][0]
-        g = snake[percentage][1][1]
-        b = snake[percentage][1][2]
+        r = SNAKE_COORDINATES[percentage][1][0]
+        g = SNAKE_COORDINATES[percentage][1][1]
+        b = SNAKE_COORDINATES[percentage][1][2]
 
-        time.sleep(0.05)
+        time.sleep(TIME_DELAY)
         unicornhatmini.set_pixel(x, y, r, g, b)
         unicornhatmini.show()
 
 
-def display_number(number, x_offset=0, y_offset=0, clear=False, rgb=None):
+def display_number(number, x_offset, y_offset, clear=False, rgb=None):
+    """Display a single number"""
     if rgb is None:
-        rgb = [255, 255, 255]
+        rgb = COLORS["white"]
 
     if clear:
         unicornhatmini.clear()
@@ -194,15 +104,16 @@ def display_number(number, x_offset=0, y_offset=0, clear=False, rgb=None):
     green = rgb[1]
     blue = rgb[2]
 
-    for pixel in numbers[number]:
+    for pixel in NUMBERS_TO_DRAW[number]:
         unicornhatmini.set_pixel(pixel[0] + x_offset, pixel[1] + y_offset, red, green, blue)
         unicornhatmini.show()
-        time.sleep(0.05)
+        time.sleep(TIME_DELAY)
 
 
 def get_prayer_times(unix_time, lat, long, method_of_calculation):
-    url_link = "http://api.aladhan.com/v1/timings/{}?latitude={}&longitude={}&method={}"\
-        .format(unix_time, lat, long, method_of_calculation)
+    """Grab the prayer times from an API and return the values we can use later"""
+    url_link = "{}/{}?latitude={}&longitude={}&method={}"\
+        .format(API_INITIAL_LINK, unix_time, lat, long, method_of_calculation)
 
     r = requests.get(url=url_link)
 
@@ -212,83 +123,87 @@ def get_prayer_times(unix_time, lat, long, method_of_calculation):
     return json.loads(r.text)
 
 
-def pressed_x():
-    global hide_time
+def pressed_x_hide_time():
+    """Hide/Show the clock when pressing the X (bottom right) button on the Unicorn Hat Mini"""
+    global x_is_pressed_hide_time
 
-    if hide_time:
-        hide_time = False
+    if x_is_pressed_hide_time:
+        x_is_pressed_hide_time = False
     else:
-        hide_time = True
+        x_is_pressed_hide_time = True
 
 
-def pressed_y():
-    global already_prayed
+def pressed_y_already_prayed():
+    """Hide/Show the Athan Snake when pressing the Y (bottom left) button on the Unicorn Hat Mini"""
+    global y_is_pressed_already_prayed
 
-    if already_prayed:
-        already_prayed = False
+    if y_is_pressed_already_prayed:
+        y_is_pressed_already_prayed = False
     else:
-        already_prayed = True
+        y_is_pressed_already_prayed = True
 
 
-def pressed_a():
-    global a_is_pressed
+def pressed_a_next_prayer():
+    """Show the next prayer time (or back to clock) when pressing the A (upper right) button on the Unicorn Hat Mini"""
+    global a_is_pressed_next_prayer
     global initial_run
 
-    if a_is_pressed:
-        a_is_pressed = False
+    if a_is_pressed_next_prayer:
+        a_is_pressed_next_prayer = False
         unicornhatmini.clear()
         unicornhatmini.show()
         initial_run = True
     else:
-        a_is_pressed = True
+        a_is_pressed_next_prayer = True
 
 
-def pressed_b():
-    global b_is_pressed
+def pressed_b_hijri_date():
+    """Show the Hijri date (or back to clock) when pressing the B (upper left) button on the Unicorn Hat Mini"""
+    global b_is_pressed_hijri_date
     global initial_run
 
-    if b_is_pressed:
-        b_is_pressed = False
+    if b_is_pressed_hijri_date:
+        b_is_pressed_hijri_date = False
         unicornhatmini.clear()
         unicornhatmini.show()
         initial_run = True
 
     else:
-        b_is_pressed = True
+        b_is_pressed_hijri_date = True
 
 
 while True:
-    button_x.when_pressed = pressed_x
-    button_y.when_pressed = pressed_y
-    button_b.when_pressed = pressed_b
-    button_a.when_pressed = pressed_a
+    BUTTON_X.when_pressed = pressed_x_hide_time
+    BUTTON_Y.when_pressed = pressed_y_already_prayed
+    BUTTON_B.when_pressed = pressed_b_hijri_date
+    BUTTON_A.when_pressed = pressed_a_next_prayer
 
     # clear prayer times
     clear_section(12, 16, 0, 6)
 
-    if hide_time:
-        a_is_pressed = False
-        b_is_pressed = False
-        time.sleep(0.05)
+    if x_is_pressed_hide_time:
+        a_is_pressed_next_prayer = False
+        b_is_pressed_hijri_date = False
+        time.sleep(TIME_DELAY)
         unicornhatmini.clear()
         unicornhatmini.show()
         initial_run = True
         continue
 
     # Grab current prayer time
-    if b_is_pressed:
-        a_is_pressed = False
-        hide_time = False
-        time.sleep(0.05)
+    if b_is_pressed_hijri_date:
+        a_is_pressed_next_prayer = False
+        x_is_pressed_hide_time = False
+        time.sleep(TIME_DELAY)
         unicornhatmini.clear()
         hour = upcoming_prayer_time.split(":")[0]
         minute = upcoming_prayer_time.split(":")[1]
         initial_run = True
 
-    elif a_is_pressed:
-        b_is_pressed = False
-        hide_time = False
-        time.sleep(0.05)
+    elif a_is_pressed_next_prayer:
+        b_is_pressed_hijri_date = False
+        x_is_pressed_hide_time = False
+        time.sleep(TIME_DELAY)
         unicornhatmini.clear()
         hour = hijri_date_raw.split("/")[0]
         minute = hijri_date_raw.split("/")[1]
@@ -309,7 +224,7 @@ while True:
             hour_tens = int(hour[0])
             hour_ones = int(hour[1])
 
-            display_number(hour_tens)
+            display_number(hour_tens, 0, 0)
             display_number(hour_ones, 0, -4)
 
         # Single Digit Hour
@@ -334,18 +249,19 @@ while True:
         minute_tens = 0
         minute_ones = int(minute)
 
-    display_number(minute_tens, 6)
+    display_number(minute_tens, 6, 0)
     display_number(minute_ones, 6, -4)
 
     # Get the prayer times prepped
     current_unix_time = int(time.time())
     today_date_str = date.today().strftime("%d/%m/%Y")
 
-    # Only grab this if we didn't have them stored or it's the wrong day
+    # Only grab this if we didn't have them stored or if it's the wrong day
     if prayer_times_raw == {} or prayer_times_date == "" or prayer_times_date != today_date_str:
         raw_request = get_prayer_times(current_unix_time, latitude, longitude, method)
         prayer_times_raw = raw_request["data"]["timings"]
-        hijri_date_raw = "{}/{}".format(raw_request["data"]["date"]["hijri"]["month"]["number"], raw_request["data"]["date"]["hijri"]["day"])
+        hijri_date_raw = "{}/{}".format(raw_request["data"]["date"]["hijri"]["month"]["number"],
+                                        raw_request["data"]["date"]["hijri"]["day"])
 
     # Grab all the prayer times from the keys, excluding Sunset, Imsak, Midnight, Firstthird, Lastthird
     prayer_times = []
@@ -366,60 +282,51 @@ while True:
     # Compare the times to right now and see how close we are to the next time:
     right_now = datetime.strptime("{} {}:{}".format(prayer_times_date, hour, minute), "%d/%m/%Y %H:%M")
 
-    differences_in_mins = []
+    differences_in_minutes = []
     next_prayer_time_name = ""
-    next_prayer_time_mins = 0
+    next_prayer_time_minutes = 0
 
     index = 0
     recent_difference = 0
-    prayer_indexes = {
-        0: "Fajr",
-        1: "Sunrise",
-        2: "Dhuhr",
-        3: "Asr",
-        4: "Maghrib",
-        5: "Isha"
-    }
     for prayer_time in prayer_times:
         difference = (prayer_time - right_now).total_seconds() / 60
 
-        # only focus on the most closest one greater than zero
+        # only focus on the closest one greater than zero
         if difference > 0:
-            next_prayer_time_mins = int(difference)
-            next_prayer_time_name = prayer_indexes[index]
+            next_prayer_time_minutes = int(difference)
+            next_prayer_time_name = PRAYER_INDEXES[index]
             break
 
         recent_difference = 0 - difference
         index += 1
 
-    if not b_is_pressed:
+    if not b_is_pressed_hijri_date:
         try:
             upcoming_prayer_time = prayer_times_raw[next_prayer_time_name]
         except KeyError:
             upcoming_prayer_time = 0
-            already_prayed = True
-
+            y_is_pressed_already_prayed = True
 
     # take the length of the prayer time
-    prayer_length = recent_difference + next_prayer_time_mins
+    prayer_length = recent_difference + next_prayer_time_minutes
 
     if 0 <= recent_difference <= 2:
-        already_prayed = False
+        y_is_pressed_already_prayed = False
 
     # convert to a percentage and display on bar graph
-    percent_remaining = int(round(100 * (next_prayer_time_mins / prayer_length)))
+    percent_remaining = int(round(100 * (next_prayer_time_minutes / prayer_length)))
 
-    if next_prayer_time_name not in ["Fajr", "Dhuhr"] and not already_prayed:
-        display_snake_pct(percent_remaining, False)
+    if next_prayer_time_name not in ["Fajr", "Dhuhr"] and not y_is_pressed_already_prayed:
+        display_snake_pct(percent_remaining)
 
     t = datetime.utcnow()
     sleep_time = 60 - t.second
     for i in range(sleep_time * 20):
-        saved_hide_time = hide_time
-        saved_already_prayed = already_prayed
-        saved_a = a_is_pressed
-        saved_b = b_is_pressed
-        time.sleep(0.05)
-        if saved_hide_time != hide_time or saved_already_prayed != already_prayed\
-                or saved_a != a_is_pressed or saved_b != b_is_pressed:
+        saved_hide_time = x_is_pressed_hide_time
+        saved_already_prayed = y_is_pressed_already_prayed
+        saved_a = a_is_pressed_next_prayer
+        saved_b = b_is_pressed_hijri_date
+        time.sleep(TIME_DELAY)
+        if saved_hide_time != x_is_pressed_hide_time or saved_already_prayed != y_is_pressed_already_prayed\
+                or saved_a != a_is_pressed_next_prayer or saved_b != b_is_pressed_hijri_date:
             break
