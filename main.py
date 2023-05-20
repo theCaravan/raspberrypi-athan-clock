@@ -2,8 +2,6 @@
 import time
 import requests
 import json
-from datetime import datetime
-from datetime import date
 from unicornhatmini import UnicornHATMini
 from constants import *
 
@@ -17,12 +15,11 @@ unicornhatmini = UnicornHATMini()
 unicornhatmini.set_brightness(SCREEN_BRIGHTNESS)
 
 # Set none of the buttons as pressed
-x_is_pressed_hide_time = False
+b_is_pressed_next_prayer = False
+a_is_pressed_hijri_date = False
 y_is_pressed_already_prayed = False
-a_is_pressed_next_prayer = False
-b_is_pressed_hijri_date = False
+x_is_pressed_hide_time = False
 
-start_time = time.time()
 initial_run = True
 
 prayer_times_raw = {}
@@ -123,14 +120,33 @@ def get_prayer_times(unix_time, lat, long, method_of_calculation):
     return json.loads(r.text)
 
 
-def pressed_x_hide_time():
-    """Hide/Show the clock when pressing the X (bottom right) button on the Unicorn Hat Mini"""
-    global x_is_pressed_hide_time
+def pressed_b_next_prayer():
+    """Show the next prayer time (or back to clock) when pressing the B (upper left) button on the Unicorn Hat Mini"""
+    global b_is_pressed_next_prayer
+    global initial_run
 
-    if x_is_pressed_hide_time:
-        x_is_pressed_hide_time = False
+    if b_is_pressed_next_prayer:
+        b_is_pressed_next_prayer = False
+        unicornhatmini.clear()
+        unicornhatmini.show()
+        initial_run = True
+
     else:
-        x_is_pressed_hide_time = True
+        b_is_pressed_next_prayer = True
+
+
+def pressed_a_hijri_date():
+    """Show the Hijri date (or back to clock) when pressing the A (upper right) button on the Unicorn Hat Mini"""
+    global a_is_pressed_hijri_date
+    global initial_run
+
+    if a_is_pressed_hijri_date:
+        a_is_pressed_hijri_date = False
+        unicornhatmini.clear()
+        unicornhatmini.show()
+        initial_run = True
+    else:
+        a_is_pressed_hijri_date = True
 
 
 def pressed_y_already_prayed():
@@ -143,75 +159,75 @@ def pressed_y_already_prayed():
         y_is_pressed_already_prayed = True
 
 
-def pressed_a_next_prayer():
-    """Show the next prayer time (or back to clock) when pressing the A (upper right) button on the Unicorn Hat Mini"""
-    global a_is_pressed_next_prayer
-    global initial_run
+def pressed_x_hide_time():
+    """Hide/Show the clock when pressing the X (bottom right) button on the Unicorn Hat Mini"""
+    global x_is_pressed_hide_time
 
-    if a_is_pressed_next_prayer:
-        a_is_pressed_next_prayer = False
-        unicornhatmini.clear()
-        unicornhatmini.show()
-        initial_run = True
+    if x_is_pressed_hide_time:
+        x_is_pressed_hide_time = False
     else:
-        a_is_pressed_next_prayer = True
-
-
-def pressed_b_hijri_date():
-    """Show the Hijri date (or back to clock) when pressing the B (upper left) button on the Unicorn Hat Mini"""
-    global b_is_pressed_hijri_date
-    global initial_run
-
-    if b_is_pressed_hijri_date:
-        b_is_pressed_hijri_date = False
-        unicornhatmini.clear()
-        unicornhatmini.show()
-        initial_run = True
-
-    else:
-        b_is_pressed_hijri_date = True
+        x_is_pressed_hide_time = True
 
 
 while True:
-    BUTTON_X.when_pressed = pressed_x_hide_time
+    # Time values are grabbed here
+    if not MOCK_RUN:
+        datetime_now = datetime.now()
+    else:
+        datetime_now = MOCK_DATETIME
+
+    current_unix_time = int(time.mktime(datetime_now.timetuple()))
+    today_date_str = datetime_now.strftime("%d/%m/%Y")
+
+    BUTTON_B.when_pressed = pressed_b_next_prayer
+    BUTTON_A.when_pressed = pressed_a_hijri_date
     BUTTON_Y.when_pressed = pressed_y_already_prayed
-    BUTTON_B.when_pressed = pressed_b_hijri_date
-    BUTTON_A.when_pressed = pressed_a_next_prayer
+    BUTTON_X.when_pressed = pressed_x_hide_time
 
     # clear prayer times
     clear_section(12, 16, 0, 6)
 
     if x_is_pressed_hide_time:
-        a_is_pressed_next_prayer = False
-        b_is_pressed_hijri_date = False
+        a_is_pressed_hijri_date = False
+        b_is_pressed_next_prayer = False
+        initial_run = True
+
         time.sleep(TIME_DELAY)
         unicornhatmini.clear()
+
         unicornhatmini.show()
-        initial_run = True
         continue
 
     # Grab current prayer time
-    if b_is_pressed_hijri_date:
-        a_is_pressed_next_prayer = False
+    if b_is_pressed_next_prayer:
+        a_is_pressed_hijri_date = False
         x_is_pressed_hide_time = False
-        time.sleep(TIME_DELAY)
-        unicornhatmini.clear()
-        hour = upcoming_prayer_time.split(":")[0]
-        minute = upcoming_prayer_time.split(":")[1]
         initial_run = True
 
-    elif a_is_pressed_next_prayer:
-        b_is_pressed_hijri_date = False
-        x_is_pressed_hide_time = False
         time.sleep(TIME_DELAY)
         unicornhatmini.clear()
+
+        if upcoming_prayer_time != 0:
+            hour = upcoming_prayer_time.split(":")[0]
+            minute = upcoming_prayer_time.split(":")[1]
+        else:
+            b_is_pressed_next_prayer = False
+            continue
+
+    elif a_is_pressed_hijri_date:
+        b_is_pressed_next_prayer = False
+        x_is_pressed_hide_time = False
+        initial_run = True
+
+        time.sleep(TIME_DELAY)
+        unicornhatmini.clear()
+
         hour = hijri_date_raw.split("/")[0]
         minute = hijri_date_raw.split("/")[1]
-        initial_run = True
 
     else:
-        hour = datetime.now().strftime("%H")
-        minute = datetime.now().strftime("%M")
+        hour = datetime_now.strftime("%H")
+        minute = datetime_now.strftime("%M")
 
     # Only run this at the first run and
     # at the first minute of the hour (i.e. 10:00, 12:00)
@@ -251,10 +267,6 @@ while True:
 
     display_number(minute_tens, 6, 0)
     display_number(minute_ones, 6, -4)
-
-    # Get the prayer times prepped
-    current_unix_time = int(time.time())
-    today_date_str = date.today().strftime("%d/%m/%Y")
 
     # Only grab this if we didn't have them stored or if it's the wrong day
     if prayer_times_raw == {} or prayer_times_date == "" or prayer_times_date != today_date_str:
@@ -300,7 +312,7 @@ while True:
         recent_difference = 0 - difference
         index += 1
 
-    if not b_is_pressed_hijri_date:
+    if not b_is_pressed_next_prayer:
         try:
             upcoming_prayer_time = prayer_times_raw[next_prayer_time_name]
         except KeyError:
@@ -314,19 +326,25 @@ while True:
         y_is_pressed_already_prayed = False
 
     # convert to a percentage and display on bar graph
-    percent_remaining = int(round(100 * (next_prayer_time_minutes / prayer_length)))
+    if prayer_length != 0:
+        percent_remaining = int(round(100 * (next_prayer_time_minutes / prayer_length)))
+    else:
+        percent_remaining = 0
 
-    if next_prayer_time_name not in ["Fajr", "Dhuhr"] and not y_is_pressed_already_prayed:
+    if next_prayer_time_name not in ["Fajr", "Dhuhr"] \
+            and not y_is_pressed_already_prayed\
+            and percent_remaining != 0:
         display_snake_pct(percent_remaining)
 
     t = datetime.utcnow()
     sleep_time = 60 - t.second
     for i in range(sleep_time * 20):
-        saved_hide_time = x_is_pressed_hide_time
-        saved_already_prayed = y_is_pressed_already_prayed
-        saved_a = a_is_pressed_next_prayer
-        saved_b = b_is_pressed_hijri_date
+        saved_b_next_prayer = b_is_pressed_next_prayer
+        saved_a_hijri_date = a_is_pressed_hijri_date
+        saved_y_already_prayed = y_is_pressed_already_prayed
+        saved_x_hide_time = x_is_pressed_hide_time
+
         time.sleep(TIME_DELAY)
-        if saved_hide_time != x_is_pressed_hide_time or saved_already_prayed != y_is_pressed_already_prayed\
-                or saved_a != a_is_pressed_next_prayer or saved_b != b_is_pressed_hijri_date:
+        if saved_x_hide_time != x_is_pressed_hide_time or saved_y_already_prayed != y_is_pressed_already_prayed\
+                or saved_a_hijri_date != a_is_pressed_hijri_date or saved_b_next_prayer != b_is_pressed_next_prayer:
             break

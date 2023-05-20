@@ -19,6 +19,4 @@ The Unicorn Hat Mini comes with 4 buttons, all functional with this program.
 - Press the lower right button once to clear the clock screen, allowing you to turn off the LEDs without turning off the device. Press it again to return to the clock
 
 Known Issues:
-- When the clock reaches Isha time, for a period of one minute it will redraw the clock every time. This goes away at the following minute. 
-   - The same redrawing effect happens between Maghrib and Isha when pressing the upper left button to show the next prayer time. 
 - When pressing one of the buttons before the drawing of the time or date finishes, the screen will stop at that point. You can remedy this by pressing the button again. 
