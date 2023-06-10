@@ -3,9 +3,9 @@ from datetime import datetime
 from gpiozero import Button
 
 # Set the GPS coordinates for your location
-# (Latitude, Longitude, Calculation Method)
-#
-LOCATION = (45.031553, -93.024759, 2)
+LOCATION_LATITUDE_ = 45.031553
+LOCATION_LONGITUDE = -93.024759
+LOCATION_CALC_MTHD = 2
 
 # If true, this will output the changes it PLANS on making without changing anything
 # helps with debugging
