@@ -231,6 +231,10 @@ while True:
     else:
         percent_remaining = 0
 
+    # Always show entire snake on next prayer time
+    if b_is_pressed_next_prayer:
+        percent_remaining = 100
+
     if next_prayer_time_name not in ["Fajr", "Dhuhr"] \
             and not y_is_pressed_already_prayed\
             and percent_remaining != 0:
