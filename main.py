@@ -70,6 +70,7 @@ def pressed_x_hide_time():
 
 
 while True:
+    year = ""
     # Time values are grabbed here
     if not MOCK_RUN:
         datetime_now = datetime.now()
@@ -124,6 +125,7 @@ while True:
 
         hour = hijri_date_raw.split("/")[0]
         minute = hijri_date_raw.split("/")[1]
+        year = hijri_date_raw.split("/")[2]
 
     else:
         hour = datetime_now.strftime("%H")
@@ -168,12 +170,17 @@ while True:
     display_number(minute_tens, 6, 0)
     display_number(minute_ones, 6, -4)
 
+    if year:
+        display_number(int(year[0]), -5, 0)
+        display_number(int(year[1]), -5, -4)
+
     # Only grab this if we didn't have them stored or if it's the wrong day
     if prayer_times_raw == {} or prayer_times_date == "" or prayer_times_date != today_date_str:
         raw_request = get_prayer_times(current_unix_time, LOCATION_LATITUDE_, LOCATION_LONGITUDE, LOCATION_CALC_MTHD)
         prayer_times_raw = raw_request["data"]["timings"]
-        hijri_date_raw = "{}/{}".format(raw_request["data"]["date"]["hijri"]["month"]["number"],
-                                        raw_request["data"]["date"]["hijri"]["day"])
+        hijri_date_raw = "{}/{}/{}".format(raw_request["data"]["date"]["hijri"]["month"]["number"],
+                                           raw_request["data"]["date"]["hijri"]["day"],
+                                           raw_request["data"]["date"]["hijri"]["year"][2:])
 
     # Grab all the prayer times from the keys, excluding Sunset, Imsak, Midnight, Firstthird, Lastthird
     prayer_times = []
@@ -260,5 +267,5 @@ while True:
     if not just_pressed:
         a_is_pressed_hijri_date = False
         b_is_pressed_next_prayer = False
-        # Clear the entire minutes section
-        clear_section(6, 10, 0, 6)
+        unicornhatmini.clear()
+        initial_run = True
