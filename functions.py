@@ -70,12 +70,12 @@ def display_snake_pct(percent):
         unicornhatmini.show()
 
 
-def display_number(number, x_offset, y_offset, clear=False, rgb=None):
+def display_number(number, x_offset, y_offset, clear=False, rgb=None, test=False):
     """Display a single number"""
     if rgb is None:
         rgb = COLORS["white"]
 
-    if clear:
+    if clear or test:
         unicornhatmini.clear()
 
     red = rgb[0]
@@ -84,6 +84,15 @@ def display_number(number, x_offset, y_offset, clear=False, rgb=None):
 
     for pixel in NUMBERS_TO_DRAW[number]:
         unicornhatmini.set_pixel(pixel[0] + x_offset, pixel[1] + y_offset, red, green, blue)
+
+        # Show the same number 6 times to ensure the display is working on test mode
+        if test:
+            unicornhatmini.set_pixel(pixel[0] + x_offset + 6, pixel[1] + y_offset, red, green, blue)
+            unicornhatmini.set_pixel(pixel[0] + x_offset - 5, pixel[1] + y_offset, red, green, blue)
+            unicornhatmini.set_pixel(pixel[0] + x_offset, pixel[1] + y_offset - 4, red, green, blue)
+            unicornhatmini.set_pixel(pixel[0] + x_offset + 6, pixel[1] + y_offset - 4, red, green, blue)
+            unicornhatmini.set_pixel(pixel[0] + x_offset - 5, pixel[1] + y_offset - 4, red, green, blue)
+
         unicornhatmini.show()
         time.sleep(TIME_DELAY)
 
@@ -99,3 +108,13 @@ def get_prayer_times(unix_time, lat, long, method_of_calculation):
         print("{} URL related to {} returned this response: {} - {}".format(url_link, "Athan", r, r.text))
 
     return json.loads(r.text)
+
+
+def test_numbers():
+    """Initial run of the clock to show you the numbers and to verify it all works"""
+    current_number = 9
+    while current_number >= 0:
+        display_number(current_number, 0, 0, test=True)
+        time.sleep(TIME_DELAY * 2)
+        current_number -= 1
+    unicornhatmini.clear()

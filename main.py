@@ -3,6 +3,9 @@ from functions import *
 
 unicornhatmini.set_brightness(SCREEN_BRIGHTNESS)
 
+# Run a display of all the numbers as a welcome greeting and a diagnostic
+test_numbers()
+
 # Set none of the buttons as pressed
 b_is_pressed_next_prayer = False
 a_is_pressed_hijri_date = False
