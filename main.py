@@ -236,6 +236,7 @@ while True:
             and percent_remaining != 0:
         display_snake_pct(percent_remaining)
 
+    just_pressed = False
     t = datetime.utcnow()
     sleep_time = 60 - t.second
     for i in range(sleep_time * 20):
@@ -247,4 +248,13 @@ while True:
         time.sleep(TIME_DELAY)
         if saved_x_hide_time != x_is_pressed_hide_time or saved_y_already_prayed != y_is_pressed_already_prayed\
                 or saved_a_hijri_date != a_is_pressed_hijri_date or saved_b_next_prayer != b_is_pressed_next_prayer:
+            just_pressed = True
             break
+
+    # Clear new screen pressed buttons if this wasn't just pressed
+    # Allows a screen to reset to the main on its own at the next minute
+    if not just_pressed:
+        a_is_pressed_hijri_date = False
+        b_is_pressed_next_prayer = False
+        # Clear the entire minutes section
+        clear_section(6, 10, 0, 6)
