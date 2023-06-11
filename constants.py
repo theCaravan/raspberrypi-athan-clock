@@ -1,17 +1,10 @@
 """Define the constants used in this project"""
 from datetime import datetime
 from gpiozero import Button
+from adjustable_settings import *
 
-# Set the GPS coordinates for your location
-LOCATION_LATITUDE_ = 45.031553
-LOCATION_LONGITUDE = -93.024759
-
-# https://aladhan.com/prayer-times-api#GetTimings -> 8. Timings - http://api.aladhan.com/v1/timings/:date
-# 2 - Islamic Society of North America
-LOCATION_CALC_MTHD = 2
-
-# Number set to display
-LANGUAGE = "Arabic"
+# These are modifiable, but this is meant for advanced folks
+# We recommend adjustable_settings.py
 
 # If true, this will output the changes it PLANS on making without changing anything
 # helps with debugging
@@ -25,9 +18,6 @@ MOCK_DATETIME = datetime(year=2023,
 
 # Al Athan API
 API_INITIAL_LINK = "https://api.aladhan.com/v1/timings"
-
-# Delay between transitions
-TIME_DELAY = 0.05
 
 COLORS = {
     "white":    (220, 220, 220),
@@ -65,9 +55,6 @@ BUTTON_B = Button(6)
 BUTTON_A = Button(5)
 BUTTON_Y = Button(24)
 BUTTON_X = Button(16)
-
-# Unicorn Hat Mini General Configuration
-SCREEN_BRIGHTNESS = 0.05
 
 
 # Athan Snake
