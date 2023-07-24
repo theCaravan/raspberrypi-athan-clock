@@ -21,7 +21,7 @@ API_INITIAL_LINK = "https://api.aladhan.com/v1/timings"
 
 # Slack constants
 SLACK_API_KEY = "CARAVAN_BOT_SLACK_CLIENT"
-MOCK_SLACK_CHANNEL = "#kinghadiofthecaravan-test"
+MOCK_SLACK_CHANNEL = "#kinghadiofthecaravan-logs"
 
 COLORS = {
     "white":    (220, 220, 220),
