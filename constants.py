@@ -17,7 +17,7 @@ MOCK_DATETIME = datetime(year=2023,
                          second=11)
 
 # Al Athan API
-API_INITIAL_LINK = "https://api.aladhan.com/v1/timings"
+API_INITIAL_LINK = "http://api.aladhan.com/v1/timings"
 
 # Slack constants
 SLACK_API_KEY = "CARAVAN_BOT_SLACK_CLIENT"
