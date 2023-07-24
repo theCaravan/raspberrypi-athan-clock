@@ -181,7 +181,6 @@ while True:
 
         if raw_request["result"] == "error":
             error_in_athan = True
-            display_snake_error()
 
         else:
             prayer_times_raw = raw_request["r.text"]["data"]["timings"]
@@ -189,7 +188,10 @@ while True:
                                                raw_request["data"]["date"]["hijri"]["day"],
                                                raw_request["data"]["date"]["hijri"]["year"][2:])
 
-    if not error_in_athan:
+    if error_in_athan:
+        display_snake_error()
+
+    else:
         # Grab all the prayer times from the keys, excluding Sunset, Imsak, Midnight, Firstthird, Lastthird
         prayer_times = []
         for prayer_time in prayer_times_raw.keys():
