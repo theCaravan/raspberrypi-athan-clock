@@ -183,7 +183,9 @@ while True:
             error_in_athan = True
 
         else:
-            prayer_times_raw = raw_request["r.text"]["data"]["timings"]
+            raw_request = raw_request["r.text"]
+
+            prayer_times_raw = raw_request["data"]["timings"]
             hijri_date_raw = "{}/{}/{}".format(raw_request["data"]["date"]["hijri"]["month"]["number"],
                                                raw_request["data"]["date"]["hijri"]["day"],
                                                raw_request["data"]["date"]["hijri"]["year"][2:])
