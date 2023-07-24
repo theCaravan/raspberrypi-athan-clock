@@ -1,12 +1,29 @@
 """Define the functions used in this project"""
+import os
 import time
 import json
 import requests
 from unicornhatmini import UnicornHATMini
+import slack_sdk
 from constants import *
 
 # Initialize Unicorn Hat Mini
 unicornhatmini = UnicornHATMini()
+
+
+def post_to_slack(slack_channel, post_text, slack_api_key, mock_run):
+    """Post text to Slack. If mock_run = True, print the text here instead"""
+
+    if mock_run:
+        print("--- post_to_slack: This would have posted to Slack Channel '{}' ---".format(slack_channel))
+        print(post_text)
+        print("--- post_to_slack: End ---")
+        return
+
+    client = slack_sdk.WebClient(os.environ[slack_api_key])
+    response = client.chat_postMessage(channel=slack_channel,
+                                       text=post_text)
+    return response
 
 
 def clear_section(start_x, end_x, start_y, end_y):
@@ -105,9 +122,19 @@ def get_prayer_times(unix_time, lat, long, method_of_calculation):
     r = requests.get(url=url_link)
 
     if r.status_code >= 400:
-        print("{} URL related to {} returned this response: {} - {}".format(url_link, "Athan", r, r.text))
+        send_to_slack = "{} URL related to {} returned this response: {} - {}".format(url_link, "Athan", r, r.text)
+        post_to_slack(MOCK_SLACK_CHANNEL, send_to_slack, SLACK_API_KEY, MOCK_RUN)
 
-    return json.loads(r.text)
+        return {
+            "result": "error",
+            "error": send_to_slack,
+            "website": url_link,
+        }
+
+    return {
+        "result": "success",
+        "r.text": json.loads(r.text),
+    }
 
 
 def test_numbers():
@@ -118,3 +145,19 @@ def test_numbers():
         time.sleep(TIME_DELAY * 2)
         current_number -= 1
     unicornhatmini.clear()
+
+
+def display_snake_error():
+    """Display error in the snake area"""
+    for percentage in SNAKE_COORDINATES.keys():
+        x = SNAKE_COORDINATES[percentage][0][0]
+        y = SNAKE_COORDINATES[percentage][0][1]
+
+        r = COLORS["red"][0]
+        g = COLORS["red"][1]
+        b = COLORS["red"][2]
+
+        time.sleep(TIME_DELAY)
+        unicornhatmini.set_pixel(x, y, r, g, b)
+        unicornhatmini.show()
+

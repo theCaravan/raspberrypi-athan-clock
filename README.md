@@ -4,6 +4,7 @@ This allows your Raspberry Pi 4 device to show the clock with an Athan clock so 
 
 Requirements:
 - Unicorn HAT Mini https://shop.pimoroni.com/en-us/products/unicorn-hat-mini
+- Slack to post error messages: https://slack.com/
 
 Set your internal clock in your Raspberry Pi to your local time and update the GPS coordinates in your main.py file to a location close enough for you. 
 

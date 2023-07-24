@@ -174,78 +174,87 @@ while True:
         display_number(int(year[0]), -5, 0)
         display_number(int(year[1]), -5, -4)
 
+    error_in_athan = False
+
     # Only grab this if we didn't have them stored or if it's the wrong day
     if prayer_times_raw == {} or prayer_times_date == "" or prayer_times_date != today_date_str:
         raw_request = get_prayer_times(current_unix_time, LOCATION_LATITUDE_, LOCATION_LONGITUDE, LOCATION_CALC_MTHD)
-        prayer_times_raw = raw_request["data"]["timings"]
-        hijri_date_raw = "{}/{}/{}".format(raw_request["data"]["date"]["hijri"]["month"]["number"],
-                                           raw_request["data"]["date"]["hijri"]["day"],
-                                           raw_request["data"]["date"]["hijri"]["year"][2:])
 
-    # Grab all the prayer times from the keys, excluding Sunset, Imsak, Midnight, Firstthird, Lastthird
-    prayer_times = []
-    for prayer_time in prayer_times_raw.keys():
+        if raw_request["result"] == "error":
+            error_in_athan = True
+            display_snake_error()
 
-        prayer_times_date = today_date_str
+        else:
+            prayer_times_raw = raw_request["r.text"]["data"]["timings"]
+            hijri_date_raw = "{}/{}/{}".format(raw_request["data"]["date"]["hijri"]["month"]["number"],
+                                               raw_request["data"]["date"]["hijri"]["day"],
+                                               raw_request["data"]["date"]["hijri"]["year"][2:])
 
-        if prayer_time in ["Sunset", "Imsak", "Midnight", "Firstthird", "Lastthird"]:
-            continue
+    if not error_in_athan:
+        # Grab all the prayer times from the keys, excluding Sunset, Imsak, Midnight, Firstthird, Lastthird
+        prayer_times = []
+        for prayer_time in prayer_times_raw.keys():
 
-        prayer_time_today = "{} {}".format(
-            prayer_times_date,
-            prayer_times_raw[prayer_time]
-        )
+            prayer_times_date = today_date_str
 
-        prayer_times.append(datetime.strptime(prayer_time_today, "%d/%m/%Y %H:%M"))
+            if prayer_time in ["Sunset", "Imsak", "Midnight", "Firstthird", "Lastthird"]:
+                continue
 
-    # Compare the times to right now and see how close we are to the next time:
-    right_now = datetime.strptime("{} {}:{}".format(prayer_times_date, hour, minute), "%d/%m/%Y %H:%M")
+            prayer_time_today = "{} {}".format(
+                prayer_times_date,
+                prayer_times_raw[prayer_time]
+            )
 
-    differences_in_minutes = []
-    next_prayer_time_name = ""
-    next_prayer_time_minutes = 0
+            prayer_times.append(datetime.strptime(prayer_time_today, "%d/%m/%Y %H:%M"))
 
-    index = 0
-    recent_difference = 0
-    for prayer_time in prayer_times:
-        difference = (prayer_time - right_now).total_seconds() / 60
+        # Compare the times to right now and see how close we are to the next time:
+        right_now = datetime.strptime("{} {}:{}".format(prayer_times_date, hour, minute), "%d/%m/%Y %H:%M")
 
-        # only focus on the closest one greater than zero
-        if difference > 0:
-            next_prayer_time_minutes = int(difference)
-            next_prayer_time_name = PRAYER_INDEXES[index]
-            break
+        differences_in_minutes = []
+        next_prayer_time_name = ""
+        next_prayer_time_minutes = 0
 
-        recent_difference = 0 - difference
-        index += 1
+        index = 0
+        recent_difference = 0
+        for prayer_time in prayer_times:
+            difference = (prayer_time - right_now).total_seconds() / 60
 
-    if not b_is_pressed_next_prayer:
-        try:
-            upcoming_prayer_time = prayer_times_raw[next_prayer_time_name]
-        except KeyError:
-            upcoming_prayer_time = 0
-            y_is_pressed_already_prayed = True
+            # only focus on the closest one greater than zero
+            if difference > 0:
+                next_prayer_time_minutes = int(difference)
+                next_prayer_time_name = PRAYER_INDEXES[index]
+                break
 
-    # take the length of the prayer time
-    prayer_length = recent_difference + next_prayer_time_minutes
+            recent_difference = 0 - difference
+            index += 1
 
-    if 0 <= recent_difference <= 2:
-        y_is_pressed_already_prayed = False
+        if not b_is_pressed_next_prayer:
+            try:
+                upcoming_prayer_time = prayer_times_raw[next_prayer_time_name]
+            except KeyError:
+                upcoming_prayer_time = 0
+                y_is_pressed_already_prayed = True
 
-    # convert to a percentage and display on bar graph
-    if prayer_length != 0:
-        percent_remaining = int(round(100 * (next_prayer_time_minutes / prayer_length)))
-    else:
-        percent_remaining = 0
+        # take the length of the prayer time
+        prayer_length = recent_difference + next_prayer_time_minutes
 
-    # Always show entire snake on next prayer time
-    if b_is_pressed_next_prayer:
-        percent_remaining = 100
+        if 0 <= recent_difference <= 2:
+            y_is_pressed_already_prayed = False
 
-    if next_prayer_time_name not in ["Fajr", "Dhuhr"] \
-            and not y_is_pressed_already_prayed\
-            and percent_remaining != 0:
-        display_snake_pct(percent_remaining)
+        # convert to a percentage and display on bar graph
+        if prayer_length != 0:
+            percent_remaining = int(round(100 * (next_prayer_time_minutes / prayer_length)))
+        else:
+            percent_remaining = 0
+
+        # Always show entire snake on next prayer time
+        if b_is_pressed_next_prayer:
+            percent_remaining = 100
+
+        if next_prayer_time_name not in ["Fajr", "Dhuhr"] \
+                and not y_is_pressed_already_prayed\
+                and percent_remaining != 0:
+            display_snake_pct(percent_remaining)
 
     just_pressed = False
     t = datetime.utcnow()

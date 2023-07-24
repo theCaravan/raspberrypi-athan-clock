@@ -19,6 +19,10 @@ MOCK_DATETIME = datetime(year=2023,
 # Al Athan API
 API_INITIAL_LINK = "https://api.aladhan.com/v1/timings"
 
+# Slack constants
+SLACK_API_KEY = "CARAVAN_BOT_SLACK_CLIENT"
+MOCK_SLACK_CHANNEL = "#kinghadiofthecaravan-test"
+
 COLORS = {
     "white":    (220, 220, 220),
     "aqua":     (0, 255, 255),
@@ -55,7 +59,6 @@ BUTTON_B = Button(6)
 BUTTON_A = Button(5)
 BUTTON_Y = Button(24)
 BUTTON_X = Button(16)
-
 
 # Athan Snake
 SNAKE_COORDINATES = {
