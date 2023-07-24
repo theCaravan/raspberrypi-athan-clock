@@ -13,6 +13,7 @@ y_is_pressed_already_prayed = False
 x_is_pressed_hide_time = False
 
 initial_run = True
+error_in_athan = False
 
 prayer_times_raw = {}
 prayer_times_date = ""
@@ -174,10 +175,8 @@ while True:
         display_number(int(year[0]), -5, 0)
         display_number(int(year[1]), -5, -4)
 
-    error_in_athan = False
-
     # Only grab this if we didn't have them stored or if it's the wrong day
-    if prayer_times_raw == {} or prayer_times_date == "" or prayer_times_date != today_date_str:
+    if prayer_times_raw == {} or prayer_times_date == "" or prayer_times_date != today_date_str and not error_in_athan:
         raw_request = get_prayer_times(current_unix_time, LOCATION_LATITUDE_, LOCATION_LONGITUDE, LOCATION_CALC_MTHD)
 
         if raw_request["result"] == "error":
