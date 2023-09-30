@@ -8,3 +8,5 @@ ExecStart=/usr/bin/python3 /home/ubuntu/github/raspberrypi-athan-clock/main.py
 
 [Install]
 WantedBy=multi-user.target
+
+# https://blog.debiania.in.ua/posts/2020-11-27-howto-delay-a-systemd-service-until-the-clock-is-synchronized.html

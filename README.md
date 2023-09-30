@@ -5,6 +5,7 @@ This allows your Raspberry Pi 4 device to show the clock with an Athan clock so 
 Requirements:
 - Unicorn HAT Mini https://shop.pimoroni.com/en-us/products/unicorn-hat-mini
 - Slack to post error messages: https://slack.com/
+- Systemd to run the clock on boot
 
 Set your internal clock in your Raspberry Pi to your local time and update the GPS coordinates in your main.py file to a location close enough for you. 
 
@@ -18,6 +19,16 @@ The Unicorn Hat Mini comes with 4 buttons, all functional with this program.
 - Press the upper right button once to show the hijri date in the MM/DD format, such that 01 is Muharram, 09 is Ramadan, 12 is Dhul Hijjah. Press it again to return to the clock.
 - Press the lower left button once to clear the prayer color snake until the next prayer time. It will automatically return at the next prayer time. Press it again to show the snake again. Note that the color snake will not show between Sunrise and Dhuhr
 - Press the lower right button once to clear the clock screen, allowing you to turn off the LEDs without turning off the device. Press it again to return to the clock
+
+Run this on startup:
+Systemd allows a script to run on startup. In this repository there is a folder /etc/systemd/user. This matches the file structure of where you should place the rasperrypi-athan-clock.service file.
+
+Once you place it, run these commands:
+sudo systemctl enable --now systemd-timesyncd.service
+sudo systemctl enable --now systemd-time-wait-sync.service
+sudo systemctl enable --now raspberrypi-athan-clock.service
+
+And when you reboot, it should start running on startup
 
 Known Issues:
 - When pressing one of the buttons before the drawing of the time or date finishes, the screen will stop at that point. You can remedy this by pressing the button again. 
