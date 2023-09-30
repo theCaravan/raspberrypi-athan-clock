@@ -1,0 +1,10 @@
+[Unit]
+Description=Raspberry Pi Athan Clock
+After=time-sync.target
+Wants=time-sync.target
+
+[Service]
+ExecStart=/usr/bin/python3 /home/ubuntu/github/raspberrypi-athan-clock/main.py
+
+[Install]
+WantedBy=multi-user.target
