@@ -190,6 +190,7 @@ while True:
                 hijri_date_raw = "{}/{}/{}".format(raw_request["data"]["date"]["hijri"]["month"]["number"],
                                                    raw_request["data"]["date"]["hijri"]["day"],
                                                    raw_request["data"]["date"]["hijri"]["year"][2:])
+                print(hijri_date_raw)
         except Exception as e:
             print("error_in_athan", e)
             error_in_athan = True
