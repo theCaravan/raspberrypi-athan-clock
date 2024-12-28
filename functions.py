@@ -149,7 +149,7 @@ def test_numbers():
 
 def display_snake_error():
     """Display error in the snake area"""
-    for percentage in [89, 74, 60, 46, 31, 17, 0]:
+    for percentage in [89, 74, 60, 46, 31, 17, 3]:
         x = SNAKE_COORDINATES[percentage][0][0]
         y = SNAKE_COORDINATES[percentage][0][1]
 
