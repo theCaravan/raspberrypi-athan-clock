@@ -177,18 +177,22 @@ while True:
 
     # Only grab this if we didn't have them stored or if it's the wrong day
     if not error_in_athan and (prayer_times_raw == {} or prayer_times_date == "" or prayer_times_date != today_date_str):
-        raw_request = get_prayer_times(current_unix_time, LOCATION_LATITUDE_, LOCATION_LONGITUDE, LOCATION_CALC_MTHD)
+        try:
+            raw_request = get_prayer_times(current_unix_time, LOCATION_LATITUDE_, LOCATION_LONGITUDE, LOCATION_CALC_MTHD)
 
-        if raw_request["result"] == "error":
+            if raw_request["result"] == "error":
+                error_in_athan = True
+
+            else:
+                raw_request = raw_request["r.text"]
+
+                prayer_times_raw = raw_request["data"]["timings"]
+                hijri_date_raw = "{}/{}/{}".format(raw_request["data"]["date"]["hijri"]["month"]["number"],
+                                                   raw_request["data"]["date"]["hijri"]["day"],
+                                                   raw_request["data"]["date"]["hijri"]["year"][2:])
+        except Exception as e:
+            print("error_in_athan", e)
             error_in_athan = True
-
-        else:
-            raw_request = raw_request["r.text"]
-
-            prayer_times_raw = raw_request["data"]["timings"]
-            hijri_date_raw = "{}/{}/{}".format(raw_request["data"]["date"]["hijri"]["month"]["number"],
-                                               raw_request["data"]["date"]["hijri"]["day"],
-                                               raw_request["data"]["date"]["hijri"]["year"][2:])
 
     if error_in_athan:
         display_snake_error()
