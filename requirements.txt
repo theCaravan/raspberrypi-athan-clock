@@ -1,4 +1,3 @@
-requests==2.32.0
-unicornhatmini~=0.0.2
-gpiozero~=1.6.2
-slack_sdk
+requests
+unicornhatmini
+gpiozero
