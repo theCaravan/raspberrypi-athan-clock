@@ -8,11 +8,15 @@ from constants import (SNAKE_COORDINATES,
                        NUMBERS_TO_DRAW,
                        API_INITIAL_LINK,
                        )
-import mock_hat_mini.bridge as unicornhatmini
+from mock_hat_mini.bridge import set_pixel as hat_set_pixel
+from mock_hat_mini.bridge import sleep as hat_sleep
+from mock_hat_mini.bridge import show as hat_show
+from mock_hat_mini.bridge import clear as hat_clear
 
 
-def clear_section(start_x, end_x, start_y, end_y):
-    """Clear a section of pixels, such as when changing the number or an entire line for a new hour"""
+def clear_section(start_x, end_x, start_y, end_y) -> None:
+    """Clear a section of pixels, such as when changing the number or an entire line for a new
+    hour"""
     this_x = start_x
 
     if start_x > end_x:
@@ -30,16 +34,17 @@ def clear_section(start_x, end_x, start_y, end_y):
     while this_x <= end_x:
         this_y = start_y
         while this_y <= end_y:
-            unicornhatmini.set_pixel(this_x, this_y, 0, 0, 0)
+            hat_set_pixel(this_x, this_y, 0, 0, 0)
             this_y += 1
         this_x += 1
 
-    unicornhatmini.sleep(TIME_DELAY)
-    unicornhatmini.show()
+    hat_sleep(TIME_DELAY)
+    hat_show()
 
 
-def display_snake_pct(percent):
-    """Display the remaining percentage based on the coordinates and colors set by SNAKE_COORDINATES"""
+def display_snake_pct(percent) -> None:
+    """Display the remaining percentage based on the coordinates and colors set by
+    SNAKE_COORDINATES"""
     percent = int(percent)
 
     if percent > 100 or percent < 0:
@@ -73,49 +78,49 @@ def display_snake_pct(percent):
         g = SNAKE_COORDINATES[percentage][1][1]
         b = SNAKE_COORDINATES[percentage][1][2]
 
-        unicornhatmini.sleep(TIME_DELAY)
-        unicornhatmini.set_pixel(x, y, r, g, b)
-        unicornhatmini.show()
+        hat_sleep(TIME_DELAY)
+        hat_set_pixel(x, y, r, g, b)
+        hat_show()
 
 
-def display_number(number, x_offset, y_offset, clear = False, rgb = None, test = False):
+def display_number(number, x_offset, y_offset, clear = False, rgb = None, test = False) -> None:
     """Display a single number"""
     if rgb is None:
         rgb = COLORS["white"]
 
     if clear or test:
-        unicornhatmini.clear()
+        hat_clear()
 
     red = rgb[0]
     green = rgb[1]
     blue = rgb[2]
 
     for pixel in NUMBERS_TO_DRAW[number]:
-        unicornhatmini.set_pixel(pixel[0] + x_offset, pixel[1] + y_offset, red, green, blue)
+        hat_set_pixel(pixel[0] + x_offset, pixel[1] + y_offset, red, green, blue)
 
         # Show the same number 6 times to ensure the display is working on test mode
         if test:
-            unicornhatmini.set_pixel(pixel[0] + x_offset + 6, pixel[1] + y_offset, red, green, blue)
-            unicornhatmini.set_pixel(pixel[0] + x_offset - 5, pixel[1] + y_offset, red, green, blue)
-            unicornhatmini.set_pixel(pixel[0] + x_offset, pixel[1] + y_offset - 4, red, green, blue)
-            unicornhatmini.set_pixel(pixel[0] + x_offset + 6,
-                                     pixel[1] + y_offset - 4,
-                                     red,
-                                     green,
-                                     blue
-                                     )
-            unicornhatmini.set_pixel(pixel[0] + x_offset - 5,
-                                     pixel[1] + y_offset - 4,
-                                     red,
-                                     green,
-                                     blue
-                                     )
+            hat_set_pixel(pixel[0] + x_offset + 6, pixel[1] + y_offset, red, green, blue)
+            hat_set_pixel(pixel[0] + x_offset - 5, pixel[1] + y_offset, red, green, blue)
+            hat_set_pixel(pixel[0] + x_offset, pixel[1] + y_offset - 4, red, green, blue)
+            hat_set_pixel(pixel[0] + x_offset + 6,
+                          pixel[1] + y_offset - 4,
+                          red,
+                          green,
+                          blue
+                          )
+            hat_set_pixel(pixel[0] + x_offset - 5,
+                          pixel[1] + y_offset - 4,
+                          red,
+                          green,
+                          blue
+                          )
 
-        unicornhatmini.show()
-        unicornhatmini.sleep(TIME_DELAY)
+        hat_show()
+        hat_sleep(TIME_DELAY)
 
 
-def get_prayer_times(unix_time, lat, long, method_of_calculation):
+def get_prayer_times(unix_time, lat, long, method_of_calculation) -> dict:
     """Grab the prayer times from an API and return the values we can use later"""
     url_link = "{}/{}?latitude={}&longitude={}&method={}" \
         .format(API_INITIAL_LINK, unix_time, lat, long, method_of_calculation)
@@ -128,17 +133,17 @@ def get_prayer_times(unix_time, lat, long, method_of_calculation):
         }
 
 
-def test_numbers():
+def test_numbers() -> None:
     """Initial run of the clock to show you the numbers and to verify it all works"""
     current_number = 9
     while current_number >= 0:
         display_number(current_number, 0, 0, test = True)
-        unicornhatmini.sleep(TIME_DELAY * 2)
+        hat_sleep(TIME_DELAY * 2)
         current_number -= 1
-    unicornhatmini.clear()
+    hat_clear()
 
 
-def display_snake_error():
+def display_snake_error() -> None:
     """Display error in the snake area"""
     for percentage in [89, 74, 60, 46, 31, 17, 3]:
         x = SNAKE_COORDINATES[percentage][0][0]
@@ -148,6 +153,6 @@ def display_snake_error():
         g = COLORS["red"][1]
         b = COLORS["red"][2]
 
-        unicornhatmini.sleep(TIME_DELAY)
-        unicornhatmini.set_pixel(x, y, r, g, b)
-        unicornhatmini.show()
+        hat_sleep(TIME_DELAY)
+        hat_set_pixel(x, y, r, g, b)
+        hat_show()

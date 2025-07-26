@@ -83,9 +83,9 @@ else:
         _mock_instance.set_pixel(x, y, r, g, b)
 
 
-    mock_gui = _mock_instance
+    BUTTON_B = MockButton(6, master = _mock_instance)
+    BUTTON_A = MockButton(5, master = _mock_instance)
+    BUTTON_Y = MockButton(24, master = _mock_instance)
+    BUTTON_X = MockButton(16, master = _mock_instance)
 
-    BUTTON_B = MockButton(6)
-    BUTTON_A = MockButton(5)
-    BUTTON_Y = MockButton(24)
-    BUTTON_X = MockButton(16)
+    mock_gui = _mock_instance
