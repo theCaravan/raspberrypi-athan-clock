@@ -8,7 +8,13 @@ if IS_PRODUCTION:
     import unicornhatmini as real_hat
     from gpiozero import Button
 
-    sleep = time.sleep
+
+    def sleep(seconds, continuation = None) -> None:
+        """Basically, regular sleep, but handle continuation"""
+        time.sleep(seconds)
+        if continuation:
+            continuation()
+
 
     # You can expose the real_hat functions directly:
     set_brightness = real_hat.set_brightness
@@ -30,20 +36,26 @@ else:
     _mock_instance = MockHatMini()
 
 
-    def tk_sleep(seconds: int) -> None:
-        """Mock sleep function in Tk"""
-        total_delay = seconds + 0.007  # Extra delay to closely simulate hardware timing
+    def tk_sleep(seconds: float, continuation = None) -> None:
+        """Mock sleep function in Tk, with optional continuation callback"""
+        total_delay = seconds + 0.007  # Extra delay to simulate hardware timing
         milliseconds = int(total_delay * 1000)
-        done = [False]
 
-        def mark_done() -> None:
-            """Mark done"""
-            done[0] = True
+        if continuation is not None:
+            # Schedule the continuation to run after the delay without blocking
+            _mock_instance.after(milliseconds, continuation)
+        else:
+            # No continuation: block with event loop until done
+            done = [False]
 
-        _mock_instance.after(milliseconds, mark_done)
+            def mark_done() -> None:
+                """Mark done"""
+                done[0] = True
 
-        while not done[0]:
-            _mock_instance.update()
+            _mock_instance.after(milliseconds, mark_done)
+
+            while not done[0]:
+                _mock_instance.update()
 
 
     sleep = tk_sleep

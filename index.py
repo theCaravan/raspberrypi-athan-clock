@@ -2,16 +2,17 @@
 import datetime
 import time
 
-from adjustable_settings import (LOCATION_LATITUDE_,
+from adjustable_settings import (LOCATION_CALC_MTHD,
+                                 LOCATION_LATITUDE_,
                                  LOCATION_LONGITUDE,
-                                 LOCATION_CALC_MTHD,
-                                 TIME_DELAY, SCREEN_BRIGHTNESS)
+                                 SCREEN_BRIGHTNESS)
 from constants import PRAYER_INDEXES
-from functions import (display_snake_pct,
-                       test_numbers,
+from functions import (clear_section,
                        display_number,
-                       clear_section,
-                       get_prayer_times, display_snake_error)
+                       display_snake_error,
+                       display_snake_pct,
+                       get_prayer_times,
+                       test_numbers)
 import mock_hat_mini.bridge as unicornhatmini
 
 initial_run = True
@@ -269,35 +270,6 @@ def reset_button_flags_if_needed(just_pressed) -> None:
         initial_run = True
 
 
-def wait_for_next_tick(iteration = 0, max_iterations = None) -> None:
-    """Non-blocking wait loop using Tkinter after(), checking buttons regularly."""
-    global a_is_pressed_hijri_date, b_is_pressed_next_prayer, y_is_pressed_already_prayed, \
-        x_is_pressed_hide_time
-
-    saved_b = b_is_pressed_next_prayer
-    saved_a = a_is_pressed_hijri_date
-    saved_y = y_is_pressed_already_prayed
-    saved_x = x_is_pressed_hide_time
-
-    # Check for button changes
-    if (saved_b != b_is_pressed_next_prayer or
-        saved_a != a_is_pressed_hijri_date or
-        saved_y != y_is_pressed_already_prayed or
-        saved_x != x_is_pressed_hide_time):
-        main_clock_loop()
-        return
-
-    # Check if done waiting
-    if max_iterations is not None and iteration >= max_iterations:
-        main_clock_loop()
-        return
-
-    # Schedule next check
-    unicornhatmini.mock_gui.after(int(TIME_DELAY * 1000),
-                                  lambda: wait_for_next_tick(iteration + 1, max_iterations)
-                                  )
-
-
 def main_clock_loop() -> None:
     """Main update loop called repeatedly."""
     main_hour, main_minute, today_date_str = update_time_vars()
@@ -309,11 +281,10 @@ def main_clock_loop() -> None:
         update_prayer_times(today_date_str)
         display_prayer_snake(main_hour, main_minute)
 
-    t = datetime.datetime.now(datetime.UTC)
-    sleep_time = 60 - t.second
-    max_iterations = sleep_time * int(1 / TIME_DELAY)
+    now = datetime.datetime.now(datetime.UTC)
+    seconds_until_next_minute = 60 - now.second - now.microsecond / 1_000_000
 
-    wait_for_next_tick(max_iterations)
+    unicornhatmini.sleep(seconds_until_next_minute, continuation = main_clock_loop)
 
 
 def main() -> None:
