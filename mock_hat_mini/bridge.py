@@ -5,8 +5,10 @@ import platform
 IS_PRODUCTION = platform.system() == "Linux"
 
 if IS_PRODUCTION:
-    import unicornhatmini as real_hat
+    from unicornhatmini import UnicornHATMini
     from gpiozero import Button
+
+    real_hat = UnicornHATMini()
 
 
     def sleep(seconds, continuation = None) -> None:
