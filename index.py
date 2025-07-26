@@ -281,7 +281,8 @@ def main_clock_loop() -> None:
         update_prayer_times(today_date_str)
         display_prayer_snake(main_hour, main_minute)
 
-    now = datetime.datetime.now(datetime.UTC)
+    utc_tz = datetime.timezone.utc
+    now = datetime.datetime.now(utc_tz)
     seconds_until_next_minute = 60 - now.second - now.microsecond / 1_000_000
 
     unicornhatmini.sleep(seconds_until_next_minute, continuation = main_clock_loop)
