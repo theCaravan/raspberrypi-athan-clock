@@ -4,7 +4,6 @@ import platform
 
 IS_PRODUCTION = platform.system() == "Linux"
 
-
 if IS_PRODUCTION:
     import unicornhatmini as real_hat
     from gpiozero import Button
@@ -30,21 +29,24 @@ else:
 
     _mock_instance = MockHatMini()
 
-    _sleep_queue = []
+
+    def tk_sleep(seconds: int) -> None:
+        """Mock sleep function in Tk"""
+        total_delay = seconds + 0.007  # Extra delay to closely simulate hardware timing
+        milliseconds = int(total_delay * 1000)
+        done = [False]
+
+        def mark_done() -> None:
+            """Mark done"""
+            done[0] = True
+
+        _mock_instance.after(milliseconds, mark_done)
+
+        while not done[0]:
+            _mock_instance.update()
 
 
-    def sleep(seconds) -> None:
-        """Non-blocking replacement for time.sleep in GUI mock"""
-
-        def resume() -> None:
-            """Resume after sleeping"""
-            if _sleep_queue:
-                func = _sleep_queue.pop(0)
-                func()
-
-        delay_ms = int(seconds * 1000)
-        mock_gui.after(delay_ms, resume)
-        raise StopIteration
+    sleep = tk_sleep
 
 
     def set_brightness(value) -> None:
