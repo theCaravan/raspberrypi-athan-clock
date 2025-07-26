@@ -1,5 +1,5 @@
 """Main Program"""
-from datetime import datetime
+import datetime
 import time
 
 from adjustable_settings import (LOCATION_LATITUDE_,
@@ -94,7 +94,7 @@ def update_time_vars() -> (any, any, any):
         x_is_pressed_hide_time
     global hijri_date_raw, upcoming_prayer_time
 
-    datetime_now = datetime.now()
+    datetime_now = datetime.datetime.now()
     today_date_str = datetime_now.strftime("%d/%m/%Y")
 
     if x_is_pressed_hide_time:
@@ -172,7 +172,7 @@ def update_prayer_times(today_date_str) -> None:
     check_d = prayer_times_date != today_date_str
     if check_a and (check_b or check_c or check_d):
         try:
-            current_unix_time = int(time.mktime(datetime.now().timetuple()))
+            current_unix_time = int(time.mktime(datetime.datetime.now().timetuple()))
             raw_request = get_prayer_times(current_unix_time,
                                            LOCATION_LATITUDE_,
                                            LOCATION_LONGITUDE,
@@ -207,15 +207,15 @@ def display_prayer_snake(snake_hour, snake_minute) -> None:
     for prayer_time in prayer_times_raw.keys():
         if prayer_time in ["Sunset", "Imsak", "Midnight", "Firstthird", "Lastthird"]:
             continue
-        prayer_times.append(datetime.strptime(f"{prayer_times_date} "
-                                              f"{prayer_times_raw[prayer_time]}",
-                                              "%d/%m/%Y %H:%M"
-                                              )
+        prayer_times.append(datetime.datetime.strptime(f"{prayer_times_date} "
+                                                       f"{prayer_times_raw[prayer_time]}",
+                                                       "%d/%m/%Y %H:%M"
+                                                       )
                             )
 
-    right_now = datetime.strptime(f"{prayer_times_date} {snake_hour}:{snake_minute}",
-                                  "%d/%m/%Y %H:%M"
-                                  )
+    right_now = datetime.datetime.strptime(f"{prayer_times_date} {snake_hour}:{snake_minute}",
+                                           "%d/%m/%Y %H:%M"
+                                           )
 
     next_prayer_time_name = ""
     next_prayer_time_minutes = 0
@@ -309,14 +309,14 @@ def main_clock_loop() -> None:
         update_prayer_times(today_date_str)
         display_prayer_snake(main_hour, main_minute)
 
-    t = datetime.utcnow()
+    t = datetime.datetime.now(datetime.UTC)
     sleep_time = 60 - t.second
     max_iterations = sleep_time * int(1 / TIME_DELAY)
 
     wait_for_next_tick(max_iterations)
 
 
-def main():
+def main() -> None:
     """Main"""
     setup_buttons()
     unicornhatmini.set_brightness(SCREEN_BRIGHTNESS)
