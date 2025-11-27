@@ -20,16 +20,10 @@ def clear_section(start_x, end_x, start_y, end_y) -> None:
     this_x = start_x
 
     if start_x > end_x:
-        print("Error, cannot clear section as start_x: {} is greater than end_x: {}".format(start_x,
-                                                                                            end_x
-                                                                                            )
-              )
+        print(f"Error, cannot clear section as start_x: {start_x} is greater than end_x: {end_x}")
 
     if start_y > end_y:
-        print("Error, cannot clear section as start_y: {} is greater than end_y: {}".format(start_y,
-                                                                                            end_y
-                                                                                            )
-              )
+        print(f"Error, cannot clear section as start_y: {start_y} is greater than end_y: {end_y}")
 
     while this_x <= end_x:
         this_y = start_y
@@ -122,8 +116,8 @@ def display_number(number, x_offset, y_offset, clear = False, rgb = None, test =
 
 def get_prayer_times(unix_time, lat, long, method_of_calculation) -> dict:
     """Grab the prayer times from an API and return the values we can use later"""
-    url_link = "{}/{}?latitude={}&longitude={}&method={}" \
-        .format(API_INITIAL_LINK, unix_time, lat, long, method_of_calculation)
+    url_link = (f"{API_INITIAL_LINK}/{unix_time}"
+                f"?latitude={lat}&longitude={long}&method={method_of_calculation}")
 
     r = requests.get(url = url_link)
 
