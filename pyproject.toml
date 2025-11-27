@@ -5,7 +5,7 @@ description = ""
 authors = ["King Hadi I via Jahsh <hadi.alaoua@gmail.com>"]
 
 [tool.poetry.dependencies]
-python = ">=3.10,<3.13"
+python = ">=3.9,<3.13"
 poetry-core = ">=1.0.0"
 requests = "^2.32.5"
 gpiozero = "^2.0.1"
