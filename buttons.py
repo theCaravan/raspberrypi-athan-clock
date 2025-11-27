@@ -1,7 +1,8 @@
 """Handle button presses"""
 import threading
 
-from state import is_pressed
+import state
+import mock_hat_mini.bridge as unicornhatmini
 
 
 class Buttons:
@@ -28,32 +29,61 @@ class Buttons:
             return self._flags.get(button_key, False)
 
 
+# Callback that will be set by index.py
+_update_display_callback = None
+
+
+def set_update_display_callback(callback: object) -> None:
+    """Set the callback to trigger immediate display updates"""
+    global _update_display_callback
+    _update_display_callback = callback
+
+
 # Create and export the singleton instance
 buttons = Buttons()
 
 
 def handle_a_pressed() -> None:
-    """Handle button A press"""
-    is_pressed.a = not is_pressed.a
+    """Handle button A press - toggle hijri date"""
     print("Button A pressed — toggle hijri date")
+
+    state.is_pressed.a = not state.is_pressed.a
+    state.clock_state.display_mode = (
+        state.DisplayMode.HIJRI if state.is_pressed.a else state.DisplayMode.CLOCK
+    )
+    unicornhatmini.clear()
+    unicornhatmini.show()
+    state.initial_run = True
 
 
 def handle_b_pressed() -> None:
-    """Handle button B press"""
-    is_pressed.b = not is_pressed.b
+    """Handle button B press - toggle next prayer"""
     print("Button B pressed — toggle next prayer")
 
-
-def handle_y_pressed() -> None:
-    """Handle button Y press"""
-    is_pressed.y = not is_pressed.y
-    print("Button Y pressed — toggle already prayed")
+    state.is_pressed.b = not state.is_pressed.b
+    state.clock_state.display_mode = (
+        state.DisplayMode.PRAYER if state.is_pressed.b else state.DisplayMode.CLOCK
+    )
+    unicornhatmini.clear()
+    unicornhatmini.show()
+    state.initial_run = True
 
 
 def handle_x_pressed() -> None:
-    """Handle button X press"""
-    is_pressed.x = not is_pressed.x
-    print("Button X pressed — toggle hide clock")
+    """Handle button X press - toggle hide clock (blank screen)"""
+    state.is_pressed.x = not state.is_pressed.x
+    state.clock_state.hide_clock = state.is_pressed.x
+    print(f"Button X pressed — {'hiding' if state.is_pressed.x else 'showing'} clock")
+
+    unicornhatmini.clear()
+    unicornhatmini.show()
+    state.initial_run = True
+
+
+def handle_y_pressed() -> None:
+    """Handle button Y press - toggle already prayed"""
+    state.is_pressed.y = not state.is_pressed.y
+    print(f"Button Y pressed — already prayed: {state.is_pressed.y}")
 
 
 def setup_hardware_buttons() -> None:

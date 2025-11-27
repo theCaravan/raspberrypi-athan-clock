@@ -1,4 +1,5 @@
 """Keep the global state of these variables, which change over time"""
+from enum import Enum
 
 
 class IsPressed:
@@ -46,11 +47,19 @@ class IsPressed:
         self.y = False
 
 
+class DisplayMode(Enum):
+    """All the possible clock states"""
+    CLOCK = "clock"
+    PRAYER = "prayer"
+    HIJRI = "hijri"
+
+
 class ClockState:
     """Define states of the clock"""
 
     def __init__(self) -> None:
         self.hide_clock = False
+        self.display_mode = DisplayMode.CLOCK
 
 
 class Current:
@@ -67,8 +76,9 @@ is_pressed = IsPressed()
 clock_state = ClockState()
 
 initial_run = True
+error_in_athan = False
+
 prayer_times_raw = {}
 prayer_times_date = ""
-error_in_athan = ""
 upcoming_prayer_time = ""
 hijri_date_raw = ""

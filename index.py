@@ -1,24 +1,23 @@
 """Main Program"""
 import datetime
 
-from adjustable_settings import (SCREEN_BRIGHTNESS)
-from buttons import setup_hardware_buttons
+from adjustable_settings import (SCREEN_BRIGHTNESS, TIME_DELAY)
+import buttons
 from functions import (clear_section,
                        display_number, test_numbers)
 import mock_hat_mini.bridge as unicornhatmini
 import state
-from state import current, clock_state
 
 
 def update_time_vars() -> (any, any, any):
     """Update global time-related variables and handle special modes."""
     datetime_now = datetime.datetime.now()
-    current.date = datetime_now.strftime("%d/%m/%Y")
+    state.current.date = datetime_now.strftime("%d/%m/%Y")
 
-    current.hour = datetime_now.strftime("%H")
-    current.minute = datetime_now.strftime("%M")
+    state.current.hour = datetime_now.strftime("%H")
+    state.current.minute = datetime_now.strftime("%M")
 
-    return current.hour, current.minute, current.date
+    return state.current.hour, state.current.minute, state.current.date
 
 
 def display_clock(clock_hour, clock_minute, year = None) -> None:
@@ -55,21 +54,60 @@ def main_clock_loop() -> None:
     """Main update loop called repeatedly."""
     main_hour, main_minute, today_date_str = update_time_vars()
 
-    if clock_state.hide_clock:
+    # clear prayer times
+    clear_section(12, 16, 0, 6)
+
+    if state.clock_state.hide_clock:
+        # Button X pressed - completely blank screen
         pass
-    else:
+    elif state.clock_state.display_mode == state.DisplayMode.CLOCK:
+        # Normal clock display
         display_clock(main_hour, main_minute)
 
+    elif state.clock_state.display_mode == state.DisplayMode.HIJRI:
+        # Button A - display Hijri date
+        print("calling display_hijri_date")
+        # display_hijri_date()
+
+    elif state.clock_state.display_mode == state.DisplayMode.PRAYER:
+        # Button B - display next prayer time
+        print("calling display_prayer_time")
+        # display_prayer_time()
+
+    # Save current states
+    saved_display_mode = state.clock_state.display_mode
+    saved_hide_clock = state.clock_state.hide_clock
+
+    # Poll for button changes until next minute
     utc_tz = datetime.timezone.utc
     now = datetime.datetime.now(utc_tz)
     seconds_until_next_minute = 60 - now.second - now.microsecond / 1_000_000
+    iterations = int(seconds_until_next_minute / TIME_DELAY)
 
-    unicornhatmini.sleep(seconds_until_next_minute, continuation = main_clock_loop)
+    # Poll for state changes
+    for i in range(iterations):
+        unicornhatmini.sleep(TIME_DELAY)
+
+        # Break immediately if any state changed
+        if (saved_display_mode != state.clock_state.display_mode or
+            saved_hide_clock != state.clock_state.hide_clock):
+            break
+    else:
+        # Loop completed without breaking (no button press) - reset special modes
+        if state.clock_state.display_mode != state.DisplayMode.CLOCK:
+            state.clock_state.display_mode = state.DisplayMode.CLOCK
+            state.is_pressed.a = False
+            state.is_pressed.b = False
+            unicornhatmini.clear()
+            state.initial_run = True
+
+    # Continue the loop
+    main_clock_loop()
 
 
 def main() -> None:
     """Main"""
-    setup_hardware_buttons()
+    buttons.setup_hardware_buttons()
     unicornhatmini.set_brightness(SCREEN_BRIGHTNESS)
     test_numbers()
     main_clock_loop()
